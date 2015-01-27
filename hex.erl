@@ -1,21 +1,47 @@
 -module(hex).
 
--export([
-         test/0
+-compile(export_all).
+
+-export([ aes_cfb128/0
+        , blowfish/0
+        , rc4/0
         ]).
 
-test() ->
-    Key  = <<"abcdefghabcdefgh">>,
-    IV   = <<"12345678abcdefgh">>,
-    Text = <<"12345678123456781234567812345678">>,
-    print_hex("Key", Key),
-    print_hex("Text", Text),
-    print_hex("IV", IV),
-    Crypt = crypto:block_encrypt(aes_cfb128, Key, IV, Text),
-    print_hex("Encrypted", Crypt),
-    ok.
+-export([ hex/1 ]).
 
-print_hex(Title, Bin) ->
-    io:format("~s~n", [Title]),
-    io:format("~s", [lists:flatten(string:join([io_lib:format("~.16B", [X]) || <<X>> <= Bin], ":"))]),
-    io:format("~n").
+aes_cfb128() ->
+    K = hexstr2bin("61626364656667686162636465666768"),
+    I = hexstr2bin("31323334353637386162636465666768"),
+    T = hexstr2bin("3132333435363738313233343536373831323334353637383132333435363738"),
+    hex(crypto:block_encrypt(aes_cfb128, K, I, T)).
+
+blowfish() ->
+    K = hexstr2bin("0123456789ABCDEFF0E1D2C3B4A59687"),
+    I = hexstr2bin("FEDCBA9876543210"),
+    T = hexstr2bin("37363534333231204E6F77206973207468652074696D6520666F722000000000"),
+    hex(crypto:block_encrypt(blowfish_cbc, K, I, T)).
+
+rc4() ->
+    K = hexstr2bin("0123456789ABCDEFF0E1D2C3B4A59687"),
+    T = hexstr2bin("37363534333231204E6F77206973207468652074696D6520666F722000000000"),
+    State = crypto:stream_init(rc4, K),
+    {_NewState, CipherText} = crypto:stream_encrypt(State, T),
+    hex(CipherText).
+
+hex(Bin) ->
+    list_to_binary(lists:flatten(string:join([io_lib:format("~.16B", [X]) || <<X>> <= Bin], ":"))).
+
+hexstr2bin(S) ->
+    list_to_binary(hexstr2list(S)).
+
+hexstr2list([X,Y|T]) ->
+    [mkint(X)*16 + mkint(Y) | hexstr2list(T)];
+hexstr2list([]) ->
+    [].
+
+mkint(C) when $0 =< C, C =< $9 ->
+    C - $0;
+mkint(C) when $A =< C, C =< $F ->
+    C - $A + 10;
+mkint(C) when $a =< C, C =< $f ->
+    C - $a + 10.
