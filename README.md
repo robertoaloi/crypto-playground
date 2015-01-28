@@ -12,5 +12,5 @@ gcc hex.c -lmcrypt -o hex
 ````
 erlc hex.erl
 erl
-hex:test().
+hex:blowfish().
 ````
