@@ -16,10 +16,10 @@ aes_cfb128() ->
     hex(crypto:block_encrypt(aes_cfb128, K, I, T)).
 
 blowfish() ->
-    K = hexstr2bin("0123456789ABCDEFF0E1D2C3B4A59687"),
+    K = hexstr2bin("0123456789abcdeff0e1d2c3b4a5968700000000000000000000000000000000000000000000000000000000000000000000000000000000"),
     I = hexstr2bin("FEDCBA9876543210"),
-    T = hexstr2bin("37363534333231204E6F77206973207468652074696D6520666F722000000000"),
-    hex(crypto:block_encrypt(blowfish_cbc, K, I, T)).
+    T = hexstr2bin("37363534333231204E6F77206973207468652074696D6520666F7220"),
+    hex(crypto:block_encrypt(blowfish_cfb64, K, I, T)).
 
 rc4() ->
     K = hexstr2bin("0123456789ABCDEFF0E1D2C3B4A59687"),
